@@ -10,17 +10,17 @@ type EventApplier interface {
 	Apply(event interface{}) error
 }
 
-func NewReflectEventApplier(target interface{}) EventApplier {
+func newReflectEventApplier(target interface{}) EventApplier {
 	targetType := reflect.TypeOf(target)
 	appliers := make(map[reflect.Type]reflect.Method)
 	for i := 0; i < targetType.NumMethod(); i++ {
 		method := targetType.Method(i)
-		if strings.HasPrefix(method.Name, "apply") && method.Type.NumIn() == 2 {
+		if strings.HasPrefix(method.Name, "Apply") && method.Type.NumIn() == 2 {
 			appliers[method.Type.In(1)] = method
 		}
 	}
 
-	return reflectEventApplier{applyTarget: target, eventsAppliers: appliers}
+	return &reflectEventApplier{applyTarget: target, eventsAppliers: appliers}
 }
 
 type reflectEventApplier struct {
@@ -28,7 +28,7 @@ type reflectEventApplier struct {
 	eventsAppliers map[reflect.Type]reflect.Method
 }
 
-func (d reflectEventApplier) Apply(event interface{}) error {
+func (d *reflectEventApplier) Apply(event interface{}) error {
 	eventType := reflect.TypeOf(event)
 
 	if applier, exists := d.eventsAppliers[eventType]; exists {

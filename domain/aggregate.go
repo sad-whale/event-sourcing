@@ -5,13 +5,12 @@ import (
 	"github.com/google/uuid"
 )
 
-type AggregateType string
-
 type AggregateRoot interface {
 	Id() uuid.UUID
 	Version() int32
 	UncommittedEvents() []interface{}
 	Commit(version int32) error
+	Emit(event interface{})
 }
 
 type AggregateRootBase struct {
@@ -25,15 +24,15 @@ func (arb *AggregateRootBase) setEventApplier(applier EventApplier) {
 	arb.eventApplier = applier
 }
 
-func (arb AggregateRootBase) Id() uuid.UUID {
+func (arb *AggregateRootBase) Id() uuid.UUID {
 	return arb.id
 }
 
-func (arb AggregateRootBase) Version() int32 {
+func (arb *AggregateRootBase) Version() int32 {
 	return arb.version
 }
 
-func (arb AggregateRootBase) UncommittedEvents() []interface{} {
+func (arb *AggregateRootBase) UncommittedEvents() []interface{} {
 	return arb.uncommittedEvents
 }
 
